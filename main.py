@@ -3,12 +3,19 @@ import random
 from pathlib import Path
 import supervision as sv
 from PIL import Image
+import torch
 from rfdetr import RFDETRBase
 from rfdetr.util.coco_classes import COCO_CLASSES
 
+# Check GPU availability
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using device: {device}")
+if device == "cuda":
+    print(f"  GPU: {torch.cuda.get_device_name(0)}")
+
 # Initialize model
-print("Loading RF-DETR model...")
-model = RFDETRBase()
+print(f"Loading RF-DETR model on {device.upper()}...")
+model = RFDETRBase(device=device)
 
 # Try to optimize for inference (may not work with all PyTorch versions)
 try:
@@ -47,7 +54,7 @@ for i, image_path in enumerate(test_images, 1):
     image = Image.open(image_path)
 
     # Run inference
-    detections = model.predict(image, threshold=0.3)
+    detections = model.predict(image, threshold=0.05)
 
     print(f"  Detected {len(detections)} objects:")
 
@@ -65,7 +72,7 @@ for i, image_path in enumerate(test_images, 1):
     # Annotate image
     annotated_image = image.copy()
     annotated_image = sv.BoxAnnotator().annotate(annotated_image, detections)
-    annotated_image = sv.LabelAnnotator().annotate(annotated_image, detections, labels)
+    # annotated_image = sv.LabelAnnotator().annotate(annotated_image, detections, labels)
 
     # Save annotated image
     output_path = output_folder / f"inference_{i}_{image_path.stem}.jpg"
