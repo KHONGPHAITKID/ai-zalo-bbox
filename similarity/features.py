@@ -14,11 +14,12 @@ from torchvision import transforms
 from torchvision.transforms import InterpolationMode
 from transformers import AutoImageProcessor, AutoModel
 
+from .extractor import FeatureExtractor
 from .utils import downscale_image
 
 
 @dataclass
-class DINOFeatureExtractor:
+class DINOFeatureExtractor(FeatureExtractor):
     """Extract normalized embeddings from a pretrained DINO ViT model.
 
     Uses the Hugging Face Hub weights (facebook/dino-vits16) so no manual

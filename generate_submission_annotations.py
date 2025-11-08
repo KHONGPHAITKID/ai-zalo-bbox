@@ -16,8 +16,7 @@ except ImportError as exc:  # pragma: no cover - hard requirement for video I/O
     raise ImportError("OpenCV (cv2) is required to run this script.") from exc
 
 from similarity import (
-    DINOFeatureExtractor,
-    DINOFeatureExtractor,
+    RMACFeatureExtractor,
     ReferenceFeature,
     crop_bbox,
     list_reference_image_paths,
@@ -93,7 +92,7 @@ def filter_detections(detections):
 
 
 def compute_similarity_scores(
-    feature_extractor: DINOFeatureExtractor,
+    feature_extractor: RMACFeatureExtractor,
     image: Image.Image,
     detections,
     references: Sequence[ReferenceFeature],
@@ -122,7 +121,7 @@ def select_detection_idx(detections, similarity_scores: Dict[int, float]) -> Opt
 
 
 def prepare_references(
-    feature_extractor: DINOFeatureExtractor, samples_root: Path, sample_name: str
+    feature_extractor: RMACFeatureExtractor, samples_root: Path, sample_name: str
 ) -> List[ReferenceFeature]:
     reference_paths = list_reference_image_paths(samples_root, sample_name)
     if not reference_paths:
@@ -140,7 +139,7 @@ def frame_entry(frame_idx: int, bbox) -> dict:
 def process_video(
     video_path: Path,
     model: RFDETRBase,
-    feature_extractor: DINOFeatureExtractor,
+    feature_extractor: RMACFeatureExtractor,
 ) -> dict:
     video_id = video_path.parent.name
     print(f"\nProcessing video: {video_id}")
@@ -221,11 +220,12 @@ def main() -> None:
     except RuntimeError:
         print("Model optimization skipped (not critical).")
 
-    feature_extractor = DINOFeatureExtractor(device=device)
+    feature_extractor = RMACFeatureExtractor(device=device)
 
     submission: List[dict] = []
     for video_path in video_paths:
         submission.append(process_video(video_path, model, feature_extractor))
+        break
 
     with open(OUTPUT_PATH, "w", encoding="utf-8") as fp:
         json.dump(submission, fp, indent=2)

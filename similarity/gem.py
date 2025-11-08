@@ -7,6 +7,8 @@ import torch
 from PIL import Image
 from transformers import AutoImageProcessor, AutoModel
 
+from .extractor import FeatureExtractor
+
 # --- GeM pooling over patch tokens ---
 class GeM(torch.nn.Module):
     def __init__(self, p: float = 3.0, eps: float = 1e-6):
@@ -50,7 +52,7 @@ def vit_dino_embedder(device="cpu", input_size=224, scales=(1.0, 1 / math.sqrt(2
     return encode
 
 
-class GeMFeatureExtractor:
+class GeMFeatureExtractor(FeatureExtractor):
     """Drop-in replacement for DINOFeatureExtractor that uses multi-scale GeM pooling."""
 
     def __init__(

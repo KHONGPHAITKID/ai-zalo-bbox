@@ -18,6 +18,8 @@ except ImportError:  # pragma: no cover - optional dependency in some envs
 
 from similarity import (
     GeMFeatureExtractor,
+    DINOFeatureExtractor,
+    RMACFeatureExtractor,
     crop_bbox,
     list_reference_image_paths,
     load_reference_features,
@@ -116,7 +118,7 @@ except RuntimeError as e:
 
 # Find all raw extracted images and reference objects
 samples_root = Path("data/train/samples")
-raw_images = list(samples_root.glob("MobilePhone_0/extract_images/raw/.jpg"))
+raw_images = list(samples_root.glob("*/extract_images/raw/*.jpg"))
 raw_images = list(samples_root.glob("Backpack_0/extract_images/raw/frame_5103_cropped.jpg"))
 
 if not raw_images:
@@ -125,7 +127,7 @@ if not raw_images:
 
 print(f"Found {len(raw_images)} extracted images")
 
-feature_extractor = GeMFeatureExtractor(device=device)
+feature_extractor = RMACFeatureExtractor(device=device)
 
 # Select a single random image for testing
 num_test_images = 1

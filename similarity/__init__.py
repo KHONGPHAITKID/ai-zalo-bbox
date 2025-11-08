@@ -1,5 +1,7 @@
+from .extractor import FeatureExtractor
 from .features import DINOFeatureExtractor
 from .gem import vit_dino_embedder, GeMFeatureExtractor
+from .mobile import RMACFeatureExtractor
 from .matching import SimilarityResult, rank_similarities, select_top_detection_indices
 from .reference_loader import (
     ReferenceFeature,
@@ -9,8 +11,10 @@ from .reference_loader import (
 from .utils import crop_bbox
 
 __all__ = [
+    "FeatureExtractor",
     "DINOFeatureExtractor",
     "GeMFeatureExtractor",
+    "RMACFeatureExtractor",
     "vit_dino_embedder",
     "SimilarityResult",
     "rank_similarities",

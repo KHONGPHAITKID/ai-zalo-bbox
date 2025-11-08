@@ -6,7 +6,7 @@ from PIL import Image
 import numpy as np
 
 REFERENCE_MAX_DIM = 192
-CROP_CONTEXT_PAD = 0.35  # 15% padding around each bbox
+CROP_CONTEXT_PAD = 0.0  # 15% padding around each bbox
 
 
 def crop_bbox(image: Image.Image, bbox: np.ndarray) -> Optional[Image.Image]:

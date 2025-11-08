@@ -3,19 +3,16 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Protocol
+from typing import Iterable, List
 
 from PIL import Image, ImageEnhance, ImageOps
 import numpy as np
 
+from .extractor import FeatureExtractor
 from .utils import downscale_image
 
 
-REFERENCE_AUG_TARGET = int(os.getenv("REFERENCE_AUG_TARGET", "3"))
-
-
-class FeatureExtractor(Protocol):
-    def extract(self, image: Image.Image) -> np.ndarray: ...
+REFERENCE_AUG_TARGET = int(os.getenv("REFERENCE_AUG_TARGET", "5"))
 
 
 @dataclass
