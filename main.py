@@ -17,7 +17,7 @@ except ImportError:  # pragma: no cover - optional dependency in some envs
     cv2 = None
 
 from similarity import (
-    DINOFeatureExtractor,
+    GeMFeatureExtractor,
     crop_bbox,
     list_reference_image_paths,
     load_reference_features,
@@ -125,7 +125,7 @@ if not raw_images:
 
 print(f"Found {len(raw_images)} extracted images")
 
-feature_extractor = DINOFeatureExtractor(device=device)
+feature_extractor = GeMFeatureExtractor(device=device)
 
 # Select a single random image for testing
 num_test_images = 1
