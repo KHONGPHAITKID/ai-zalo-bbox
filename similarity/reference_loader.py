@@ -11,7 +11,7 @@ import numpy as np
 from .utils import downscale_image
 
 
-REFERENCE_AUG_TARGET = int(os.getenv("REFERENCE_AUG_TARGET", "10"))
+REFERENCE_AUG_TARGET = int(os.getenv("REFERENCE_AUG_TARGET", "3"))
 
 
 class FeatureExtractor(Protocol):

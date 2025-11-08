@@ -16,7 +16,8 @@ except ImportError as exc:  # pragma: no cover - hard requirement for video I/O
     raise ImportError("OpenCV (cv2) is required to run this script.") from exc
 
 from similarity import (
-    GeMFeatureExtractor,
+    DINOFeatureExtractor,
+    DINOFeatureExtractor,
     ReferenceFeature,
     crop_bbox,
     list_reference_image_paths,
@@ -31,12 +32,7 @@ OUTPUT_PATH = Path(os.getenv("ANNOTATIONS_OUTPUT", "annotations.json"))
 MODEL_THRESHOLD = float(os.getenv("MODEL_THRESHOLD", "0.0"))
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.13"))
 MAX_DETECTIONS_PER_FRAME = int(os.getenv("MAX_DETECTIONS_PER_FRAME", "15"))
-
-_sim_env = os.getenv("SIMILARITY_TOP_K", "1").strip().lower()
-if _sim_env in {"", "none", "all"}:
-    SIMILARITY_TOP_K: Optional[int] = None
-else:
-    SIMILARITY_TOP_K = max(1, int(_sim_env))
+SIMILARITY_TOP_K = 1
 
 DENOISE_RADIUS = float(os.getenv("DENOISE_RADIUS", "0"))
 CLAHE_ENABLED = os.getenv("CLAHE_ENABLED", "0").lower() in {"1", "true", "yes", "on"}
@@ -97,7 +93,7 @@ def filter_detections(detections):
 
 
 def compute_similarity_scores(
-    feature_extractor: GeMFeatureExtractor,
+    feature_extractor: DINOFeatureExtractor,
     image: Image.Image,
     detections,
     references: Sequence[ReferenceFeature],
@@ -126,7 +122,7 @@ def select_detection_idx(detections, similarity_scores: Dict[int, float]) -> Opt
 
 
 def prepare_references(
-    feature_extractor: GeMFeatureExtractor, samples_root: Path, sample_name: str
+    feature_extractor: DINOFeatureExtractor, samples_root: Path, sample_name: str
 ) -> List[ReferenceFeature]:
     reference_paths = list_reference_image_paths(samples_root, sample_name)
     if not reference_paths:
@@ -144,7 +140,7 @@ def frame_entry(frame_idx: int, bbox) -> dict:
 def process_video(
     video_path: Path,
     model: RFDETRBase,
-    feature_extractor: GeMFeatureExtractor,
+    feature_extractor: DINOFeatureExtractor,
 ) -> dict:
     video_id = video_path.parent.name
     print(f"\nProcessing video: {video_id}")
@@ -225,7 +221,7 @@ def main() -> None:
     except RuntimeError:
         print("Model optimization skipped (not critical).")
 
-    feature_extractor = GeMFeatureExtractor(device=device)
+    feature_extractor = DINOFeatureExtractor(device=device)
 
     submission: List[dict] = []
     for video_path in video_paths:
