@@ -1,0 +1,38 @@
+video:
+  fps_override: null
+  tile_grid: [1, 1]
+proposals:
+  engine: "yolo"
+  input_size: 1280
+  conf_thres: 0.10
+  iou_thres: 0.70
+  max_det: 300
+embedder:
+  model: "dinov2_b14"
+  input_size: 224
+gallery:
+  aug_per_ref: 4
+  max_refs: 64
+  memory_max: 30
+  memory_add_sim_cap: 0.85
+similarity:
+  init_thresh: 0.62
+  adapt_bg_window: 50
+assigner:
+  alpha_iou: 0.4
+  beta_app: 0.6
+  iou_gate: 0.10
+  sim_gate: 0.55
+  cost_gate: 0.90
+  new_track_sim: 0.68
+  max_age: 30
+tracker:
+  engine: "ostrack"
+  gap_trigger: 3
+  search_scale: 2.5
+post:
+  smooth_window: 5
+  track_only_max: 12
+runtime:
+  device: "cuda:0"
+  batch_embed: 256

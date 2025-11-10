@@ -109,3 +109,30 @@ python main.py
 ```bash
 pip install opencv-python tqdm pillow supervision torch rfdetr
 ```
+
+## New UAV Target Pipeline (`uav_object_finder/`)
+
+This repository now bundles an end-to-end, modular pipeline that follows the proposal → embedding → similarity → tracking stack described in the project brief. The implementation lives under `uav_object_finder/` and keeps using the same `data/train/samples/<SampleName>/object_images` references you have already prepared.
+
+### Key components
+- **Proposals:** YOLO/DETR backends when available, with a contour-based fallback so the pipeline always produces candidate boxes.
+- **Embedding:** DINO/CLIP-style ViT features if PyTorch + TorchVision weights are present; otherwise a lightweight color-moment embedder keeps things running without GPU dependencies.
+- **Similarity + Memory:** Reference gallery builder with augmentations, adaptive background calibration, and a FIFO diversity-aware memory bank.
+- **Tracking:** ByteTrack-style assignment with Kalman motion, simple Hungarian association (SciPy if installed, greedy otherwise), and an OSTrack-inspired template fallback for short gaps.
+- **Post:** Median smoothing plus presence gating to emit `{bbox, conf, present}` per frame while updating the memory bank online.
+
+### Running the new pipeline
+
+```bash
+# Example: track the Backpack_0 target using its default references
+python -m uav_object_finder.run \
+  --video data/train/samples/Backpack_0/drone_video.mp4 \
+  --sample Backpack_0 \
+  --output video_inference_results/Backpack_0_uav.json
+```
+
+Use `--refs /custom/path/*.jpg` if you want to point at an arbitrary reference set, and `--config` to swap in a custom YAML that overrides detector thresholds, memory sizes, etc. Outputs follow the expected `{bbox, conf, present}` schema and can be post-processed into submission files just like the legacy scripts.
+
+### Extra dependencies
+- **Required:** `numpy`, `Pillow`, `opencv-python` (for video/proposals), `PyYAML`.
+- **Optional but recommended:** `torch`, `torchvision`, `ultralytics`, `scipy`. The code auto-detects these packages and downgrades gracefully when they are missing.
