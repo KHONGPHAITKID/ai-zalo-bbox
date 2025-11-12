@@ -20,6 +20,7 @@ class ProposalConfig:
     conf_thres: float
     iou_thres: float
     max_det: int
+    topk_embed: int | None = None
 
 
 @dataclass

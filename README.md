@@ -116,6 +116,7 @@ This repository now bundles an end-to-end, modular pipeline that follows the pro
 
 ### Key components
 - **Proposals:** YOLO/DETR backends when available, with a contour-based fallback so the pipeline always produces candidate boxes.
+- **Candidate limiting:** `proposals.topk_embed` (default 120) keeps only the highest-confidence detections for embedding to avoid wasting compute on hundreds of low-quality boxes.
 - **Embedding:** DINO/CLIP-style ViT features if PyTorch + TorchVision weights are present; otherwise a lightweight color-moment embedder keeps things running without GPU dependencies.
 - **Similarity + Memory:** Reference gallery builder with augmentations, adaptive background calibration, and a FIFO diversity-aware memory bank.
 - **Tracking:** ByteTrack-style assignment with Kalman motion, simple Hungarian association (SciPy if installed, greedy otherwise), and an OSTrack-inspired template fallback for short gaps.
@@ -132,6 +133,37 @@ python -m uav_object_finder.run \
 ```
 
 Use `--refs /custom/path/*.jpg` if you want to point at an arbitrary reference set, and `--config` to swap in a custom YAML that overrides detector thresholds, memory sizes, etc. Outputs follow the expected `{bbox, conf, present}` schema and can be post-processed into submission files just like the legacy scripts.
+
+### DE-ViT video pipeline with overlay export
+
+If you have the DE-ViT repo + detectron2 installed, you can run the heavier detector/tracker that produces both a CSV and an MP4 overlay for observability:
+
+```bash
+python -m uav_object_finder.devit_run \
+  --video data/train/samples/Backpack_0/drone_video.mp4 \
+  --sample Backpack_0 \
+  --out-dir video_inference_results/devit \
+  --device cuda:0 \
+  --proto-model dinov2_vitl14
+```
+
+By default, outputs land under `video_inference_results/devit/<SampleName>/overlay.mp4` and `detections.csv`. Override the paths via `--overlay` / `--csv`, or pass `--refs` if you want to supply a custom support set instead of `--sample`.
+
+Use `--proto-model dinov2_vits14` when running smaller DE-ViT configs (e.g., `vits.yaml`) so the prototype embeddings match the detector backbone width.
+
+### Debugging a single frame
+
+For quick inspection without running the full video, execute:
+
+```bash
+python -m uav_object_finder.debug_one_frame \
+  --video data/train/samples/Backpack_0/drone_video.mp4 \
+  --sample Backpack_0 \
+  --output /tmp/debug_frame.json \
+  --save-image /tmp/debug_frame.jpg
+```
+
+By default this grabs a random frame (or the one you pass via `--frame`), disables the memory bank, reports the top proposals + fused confidences, and—if `--save-image` is provided—stores the frame with the best bbox annotated for quick visual inspection.
 
 ### Extra dependencies
 - **Required:** `numpy`, `Pillow`, `opencv-python` (for video/proposals), `PyYAML`.

@@ -70,7 +70,6 @@ def run_pipeline(
     kalman = KalmanFilter()
     tracker = OStrackFallback(cfg.tracker)
     smoother = TemporalSmoother(cfg.post)
-
     frame_iter = build_frame_iterator(video_path, cfg.video.fps_override)
 
     tracks: List[Track] = []
@@ -79,6 +78,8 @@ def run_pipeline(
 
     for frame_idx, frame in frame_iter:
         proposals = proposal_generator.generate(frame)
+        if cfg.proposals.topk_embed and len(proposals) > cfg.proposals.topk_embed:
+            proposals = sorted(proposals, key=lambda b: b.score_det, reverse=True)[: cfg.proposals.topk_embed]
         crops, boxes = crop_from_boxes(frame, proposals)
         embeddings = embedder.encode(crops, cfg.runtime.batch_embed) if crops else np.zeros((0, 1), dtype=np.float32)
         gallery_with_memory = gallery.with_memory(memory)
@@ -150,9 +151,10 @@ def run_pipeline(
         }
         outputs.append(output_entry)
 
-        if present and main and main.last_conf >= 0.7 and main.last_box and main.last_box.crop_idx is not None:
-            embedding = embeddings[main.last_box.crop_idx : main.last_box.crop_idx + 1]
-            memory.maybe_add(embedding.squeeze(0))
+        # if present and main and main.last_conf >= 0.7 and main.last_box and main.last_box.crop_idx is not None:
+        #     embedding = embeddings[main.last_box.crop_idx : main.last_box.crop_idx + 1]
+        #     memory.maybe_add(embedding.squeeze(0))
+        break
 
     if output_path:
         Path(output_path).write_text(json.dumps(outputs, indent=2))
